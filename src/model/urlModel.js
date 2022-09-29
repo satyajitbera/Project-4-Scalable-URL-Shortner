@@ -11,7 +11,7 @@ const URLSchema = new mongoose.Schema({
     longUrl: {
         type: String,
         required: true,
-        trim: true,
+    //    trim: true,
         //valid url
     },
     shortUrl: {
@@ -20,7 +20,9 @@ const URLSchema = new mongoose.Schema({
         unique: true,
         trim: true
     }
-})
+},{ timestamps: true })
+
+
 module.exports = mongoose.model('URL', URLSchema)
 
 //URL regex :- const regexLogoLink = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-/]))?/
