@@ -60,16 +60,16 @@ const createURL = async function (req, res) {
         }
         //get data from cache for checking unique longurl
         let cachedUniqueUrlData = await GET_ASYNC(`${longUrl}`)
-
-        if (cachedUniqueUrlData) {
-            return res.status(200).send({ status: true, message: "URL already shortened, responce from cache" })
+        cachedData = JSON.parse(cachedUniqueUrlData)
+        if (cachedData) {
+            return res.status(200).send({ status: true, shortUrl: cachedData.shortUrl })
         }
 
         let uniqueUrl = await urlModel.findOne({ longUrl: longUrl })
         //set data to cache
         await SET_ASYNC(`${longUrl}`, JSON.stringify(uniqueUrl));
         if (uniqueUrl) {
-            return res.status(200).send({ status: true, message: "URL already shortened" })
+            return res.status(200).send({ status: true, shortUrl: uniqueUrl.shortUrl })
         }
         //generating url code
         const urlCode = shortid.generate()
@@ -102,18 +102,17 @@ const createURL = async function (req, res) {
 const getUrl = async function (req, res) {
     try {
 
-
         const urlCode = req.params.urlCode;
         let cachedData = await GET_ASYNC(`${urlCode}`)
         cachedData = JSON.parse(cachedData)
         if (cachedData) {
-            return res.status(302).redirect(cachedData)
+            return res.status(200).redirect(cachedData)
         }
         else {
             let findURL = await urlModel.findOne({ urlCode: urlCode })
             if (!findURL) return res.status(404).send({ status: false, message: "No URL Found" })
             await SET_ASYNC(`${urlCode}`, JSON.stringify(findURL.longUrl))
-            return res.status(302).redirect(findURL.longUrl)
+            return res.status(200).redirect(findURL.longUrl)
         }
 
     }
