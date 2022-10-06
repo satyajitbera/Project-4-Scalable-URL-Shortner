@@ -1,10 +1,11 @@
 const express = require('express')
 const route = require('./routes/route')
 const mongoose = require('mongoose')
+const bodyParser = require("body-parser")
 const app = express()
 
-app.use(express.json())
-
+app.use(bodyParser.json())
+    
 mongoose.connect("mongodb+srv://Amaryadav7878:XW9jCVVJDRcwcBR4@cluster0.wpi75.mongodb.net/group36Database-db?retryWrites=true&w=majority",
     { useNewUrlParser: true }
 )
