@@ -46,7 +46,7 @@ const createURL = async function (req, res) {
         let data = req.body
         //checking body validation
         if (isValidBody(data)) {
-            return res.status(400).send({ status: false, message: "Please Provide data" })
+            return res.status(400).send({ status: false, message: "Please Provide data in body" })
         }
 
         const longUrl = data.longUrl
@@ -62,21 +62,21 @@ const createURL = async function (req, res) {
         let cachedUniqueUrlData = await GET_ASYNC(`${longUrl}`)
         cachedData = JSON.parse(cachedUniqueUrlData)
         if (cachedData) {
-            return res.status(200).send({ status: true, shortUrl: cachedData.shortUrl })
+            return res.status(200).send({ status: true, msg: "c", shortUrl: cachedData.shortUrl })
         }
 
         let uniqueUrl = await urlModel.findOne({ longUrl: longUrl })
         //set data to cache
-        await SET_ASYNC(`${longUrl}`, JSON.stringify(uniqueUrl));
+        // await SET_ASYNC(`${longUrl}`, JSON.stringify(uniqueUrl));
         if (uniqueUrl) {
-            return res.status(200).send({ status: true, shortUrl: uniqueUrl.shortUrl })
+            return res.status(200).send({ status: true, msg: "db", shortUrl: uniqueUrl.shortUrl })
         }
         //generating url code
         const urlCode = shortid.generate()
         //checking unique urlcode
         let alreadyURl = await urlModel.findOne({ urlCode: urlCode })
         if (alreadyURl) {
-            return res.status(409).send({ status: true, message: "URL already exist" })
+            return res.status(409).send({ status: true, message: "URL code already exist" })
         }
         //creating short url
         let baseUrl = "http://localhost:3000/"
@@ -89,6 +89,8 @@ const createURL = async function (req, res) {
         }
         //creating Data inside DataBase
         let createUrl = await urlModel.create(Data)
+        //setting Data in Cache
+        await SET_ASYNC(`${longUrl}`, JSON.stringify(createUrl));
         return res.status(201).send({ status: true, message: "URL shortened Successfully", data: Data })
 
     }
@@ -106,13 +108,13 @@ const getUrl = async function (req, res) {
         let cachedData = await GET_ASYNC(`${urlCode}`)
         cachedData = JSON.parse(cachedData)
         if (cachedData) {
-            return res.status(200).redirect(cachedData)
+            return res.status(302).redirect(cachedData)
         }
         else {
             let findURL = await urlModel.findOne({ urlCode: urlCode })
             if (!findURL) return res.status(404).send({ status: false, message: "No URL Found" })
             await SET_ASYNC(`${urlCode}`, JSON.stringify(findURL.longUrl))
-            return res.status(200).redirect(findURL.longUrl)
+            return res.status(302).redirect(findURL.longUrl)
         }
 
     }
